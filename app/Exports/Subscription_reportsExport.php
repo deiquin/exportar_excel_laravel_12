@@ -4,11 +4,13 @@ namespace App\Exports;
 
 use App\Models\Subscription_report;
 use Maatwebsite\Excel\Concerns\FromCollection;
-use App\Models\Report_credit_card;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class Subscription_reportsExport implements FromCollection, WithHeadings
+class Subscription_reportsExport implements FromCollection, WithHeadings, WithChunkReading, WithStyles
 {
     /**
     * @return \Illuminate\Support\Collection
@@ -86,9 +88,20 @@ class Subscription_reportsExport implements FromCollection, WithHeadings
 
     public function headings(): array 
     {
-        return ['id', 'NOMBRE_COMPLETO', 'DNI', 'EMAIL', 'TELEFONO','COMPANIA', 
+        return ['ID', 'NOMBRE_COMPLETO', 'DNI', 'EMAIL', 'TELEFONO','COMPANIA', 
         'TIPO_DE_DEUDA', 'SITUACION', 'ATRASO', 'ENTIDAD', 'MONTO_TOTAL',
         'LINEA_TOTAL', 'LINEA_USADA', 'REPORTE_SUBIDO_EL', 'ESTADO'];
     }
-}
-                                     
+
+    public function chunkSize(): int
+    {
+        return 1000;
+    }
+
+    public function styles(Worksheet $sheet)
+    {
+        return [
+            1 => ['font' => ['bold' => true]], // fila 1 en negrita
+        ];
+    }
+}                                  
