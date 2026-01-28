@@ -3,14 +3,15 @@
 namespace App\Exports;
 
 use App\Models\Subscription_report;
-use Maatwebsite\Excel\Concerns\FromCollection;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
-class Subscription_reportsExport implements FromCollection, WithHeadings, WithChunkReading, WithStyles
+class Subscription_reportsExport implements FromQuery, WithHeadings,  WithStyles, ShouldQueue, WithChunkReading
 {
     /**
     * @return \Illuminate\Support\Collection
@@ -24,9 +25,8 @@ class Subscription_reportsExport implements FromCollection, WithHeadings, WithCh
         $this->fecha2 = $fecha2;
     }
 
-    public function collection()
+    public function query()
     {
-
         $first = Subscription_report::select('subscription_reports.id AS ID', 
                     'subscriptions.full_name AS NOMBRE_COMPLETO', 
                     'subscriptions.document AS DNI', 'subscriptions.email AS EMAIL', 
@@ -80,11 +80,10 @@ class Subscription_reportsExport implements FromCollection, WithHeadings, WithCh
                 ->where('subscription_reports.created_at', '>', $this->fecha1)
                 ->where('subscription_reports.created_at', '<', $this->fecha2)
                 ->union($second)
-                ->get();
+                ->orderBy('ID');
 
         return $third;
-
-    }
+ }
 
     public function headings(): array 
     {
